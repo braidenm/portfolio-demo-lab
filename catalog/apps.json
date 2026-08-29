@@ -15,7 +15,7 @@
       "kind": "terminal",
       "status": "available",
       "sourceUrl": "https://github.com/braidenm/MakeChangeProject",
-      "embedUrl": "https://make-change.demos.braidenmiller.com/",
+      "embedUrl": "https://make-change-demo.braidenmiller.com/",
       "summary": "An early Java exercise using console input, arithmetic, branching, and denomination calculations.",
       "technologies": ["Java", "CLI"]
     },
@@ -26,7 +26,7 @@
       "kind": "terminal",
       "status": "available",
       "sourceUrl": "https://github.com/braidenm/JetsProject",
-      "embedUrl": "https://jets.demos.braidenmiller.com/",
+      "embedUrl": "https://jets-demo.braidenmiller.com/",
       "summary": "An object-oriented Java application modeling aircraft, pilots, interfaces, inheritance, and interactive menus.",
       "technologies": ["Java", "OOP", "CLI"]
     },
@@ -37,7 +37,7 @@
       "kind": "terminal",
       "status": "available",
       "sourceUrl": "https://github.com/braidenm/FilmQueryProject",
-      "embedUrl": "https://film-query.demos.braidenmiller.com/",
+      "embedUrl": "https://film-query-demo.braidenmiller.com/",
       "summary": "A Java and JDBC terminal application for querying seeded relational film data.",
       "technologies": ["Java", "JDBC", "MariaDB", "CLI"]
     },
@@ -48,7 +48,7 @@
       "kind": "terminal",
       "status": "available",
       "sourceUrl": "https://github.com/braidenm/BlackjackProject",
-      "embedUrl": "https://blackjack.demos.braidenmiller.com/",
+      "embedUrl": "https://blackjack-demo.braidenmiller.com/",
       "summary": "A console blackjack game demonstrating object-oriented modeling, collections, enums, and game-state decisions.",
       "technologies": ["Java", "OOP", "CLI"]
     },
@@ -59,7 +59,7 @@
       "kind": "web",
       "status": "available",
       "sourceUrl": "https://github.com/braidenm/JPACRUDProject",
-      "embedUrl": "https://workout.demos.braidenmiller.com/",
+      "embedUrl": "https://workout-demo.braidenmiller.com/",
       "summary": "A first database-backed Spring, JPA, JSP, and MySQL-style CRUD application.",
       "technologies": ["Java", "Spring Boot", "JPA", "JSP", "MariaDB"]
     },
@@ -70,7 +70,7 @@
       "kind": "web",
       "status": "available",
       "sourceUrl": "https://github.com/braidenm/MidTerm-FullStack",
-      "embedUrl": "https://volunteer.demos.braidenmiller.com/",
+      "embedUrl": "https://volunteer-demo.braidenmiller.com/",
       "summary": "A collaborative full-stack learning project for community volunteer activities, profiles, projects, and comments.",
       "technologies": ["Java", "Spring MVC", "JPA", "JSP", "MariaDB"]
     },
@@ -87,4 +87,3 @@
     }
   ]
 }
-
