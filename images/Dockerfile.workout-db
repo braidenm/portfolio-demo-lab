@@ -1,0 +1,4 @@
+FROM mariadb:10.11
+LABEL org.opencontainers.image.title="Portfolio progression demo database: workout-crud" \
+      org.opencontainers.image.source="https://github.com/braidenm/portfolio-demo-lab"
+COPY upstream/workout-crud/DB/therealdeal.sql /docker-entrypoint-initdb.d/001-schema-and-seed.sql

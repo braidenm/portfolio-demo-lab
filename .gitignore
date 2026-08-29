@@ -1,0 +1,6 @@
+.env
+.idea/
+.local/
+build/
+tmp/
+

@@ -1,0 +1,5 @@
+FROM mariadb:10.11
+LABEL org.opencontainers.image.title="Portfolio progression demo database: volunteer-up" \
+      org.opencontainers.image.source="https://github.com/braidenm/portfolio-demo-lab"
+COPY upstream/volunteer-up/DB/villagedb.sql /docker-entrypoint-initdb.d/001-schema-and-seed.sql
+COPY adapters/volunteer-up/db/002-linux-table-case.sql /docker-entrypoint-initdb.d/002-linux-table-case.sql

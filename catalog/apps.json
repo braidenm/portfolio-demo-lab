@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "comparisonMessage": "These preserved learning-era projects show my progression from Java CLI and first CRUD applications to the current Platform Demo's product, architecture, testing, delivery, security, and operations work.",
+  "currentPlatform": {
+    "title": "Platform App Lab",
+    "url": "https://app.braidenmiller.com/",
+    "sourceUrl": "https://github.com/braidenm/platform-demo",
+    "label": "Current platform work"
+  },
+  "apps": [
+    {
+      "id": "make-change",
+      "title": "Make Change",
+      "year": 2018,
+      "kind": "terminal",
+      "status": "available",
+      "sourceUrl": "https://github.com/braidenm/MakeChangeProject",
+      "embedUrl": "https://make-change.demos.braidenmiller.com/",
+      "summary": "An early Java exercise using console input, arithmetic, branching, and denomination calculations.",
+      "technologies": ["Java", "CLI"]
+    },
+    {
+      "id": "jets",
+      "title": "Jets",
+      "year": 2018,
+      "kind": "terminal",
+      "status": "available",
+      "sourceUrl": "https://github.com/braidenm/JetsProject",
+      "embedUrl": "https://jets.demos.braidenmiller.com/",
+      "summary": "An object-oriented Java application modeling aircraft, pilots, interfaces, inheritance, and interactive menus.",
+      "technologies": ["Java", "OOP", "CLI"]
+    },
+    {
+      "id": "film-query",
+      "title": "Film Query",
+      "year": 2018,
+      "kind": "terminal",
+      "status": "available",
+      "sourceUrl": "https://github.com/braidenm/FilmQueryProject",
+      "embedUrl": "https://film-query.demos.braidenmiller.com/",
+      "summary": "A Java and JDBC terminal application for querying seeded relational film data.",
+      "technologies": ["Java", "JDBC", "MariaDB", "CLI"]
+    },
+    {
+      "id": "blackjack",
+      "title": "Blackjack",
+      "year": 2019,
+      "kind": "terminal",
+      "status": "available",
+      "sourceUrl": "https://github.com/braidenm/BlackjackProject",
+      "embedUrl": "https://blackjack.demos.braidenmiller.com/",
+      "summary": "A console blackjack game demonstrating object-oriented modeling, collections, enums, and game-state decisions.",
+      "technologies": ["Java", "OOP", "CLI"]
+    },
+    {
+      "id": "workout-crud",
+      "title": "Workout JPA CRUD",
+      "year": 2019,
+      "kind": "web",
+      "status": "available",
+      "sourceUrl": "https://github.com/braidenm/JPACRUDProject",
+      "embedUrl": "https://workout.demos.braidenmiller.com/",
+      "summary": "A first database-backed Spring, JPA, JSP, and MySQL-style CRUD application.",
+      "technologies": ["Java", "Spring Boot", "JPA", "JSP", "MariaDB"]
+    },
+    {
+      "id": "volunteer-up",
+      "title": "VolunteerUp",
+      "year": 2019,
+      "kind": "web",
+      "status": "available",
+      "sourceUrl": "https://github.com/braidenm/MidTerm-FullStack",
+      "embedUrl": "https://volunteer.demos.braidenmiller.com/",
+      "summary": "A collaborative full-stack learning project for community volunteer activities, profiles, projects, and comments.",
+      "technologies": ["Java", "Spring MVC", "JPA", "JSP", "MariaDB"]
+    },
+    {
+      "id": "mvc-film",
+      "title": "MVC Film Site",
+      "year": 2019,
+      "kind": "web",
+      "status": "source-recovery-required",
+      "sourceUrl": "https://github.com/braidenm/MVCFilmSite",
+      "embedUrl": null,
+      "summary": "A team Spring MVC film CRUD project whose current repository preserves documentation but not the application source.",
+      "technologies": ["Java", "Spring MVC", "JDBC", "JSP"]
+    }
+  ]
+}
+

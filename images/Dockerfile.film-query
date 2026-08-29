@@ -1,0 +1,34 @@
+# syntax=docker/dockerfile:1.7
+
+FROM maven:3.9-eclipse-temurin-21 AS build
+COPY upstream/film-query /workspace
+WORKDIR /workspace
+RUN sed -i 's|private static final String url = "jdbc:mysql://localhost:3306/sdvid?useSSL=false";|private static final String url = System.getenv().getOrDefault("FILM_DB_URL", "jdbc:mysql://film-query-db:3306/sdvid?useSSL=false");|' src/com/skilldistillery/filmquery/database/DatabaseAccessorObject.java \
+    && sed -i 's|private String user = "student";|private String user = System.getenv().getOrDefault("FILM_DB_USER", "film_demo");|' src/com/skilldistillery/filmquery/database/DatabaseAccessorObject.java \
+    && sed -i 's|private String pass = "student";|private String pass = System.getenv().getOrDefault("FILM_DB_PASSWORD", "demo-only");|' src/com/skilldistillery/filmquery/database/DatabaseAccessorObject.java \
+    && mvn --batch-mode --no-transfer-progress -Dmaven.test.skip=true package dependency:copy-dependencies -DoutputDirectory=/dependencies
+
+FROM tsl0922/ttyd:1.7.7@sha256:9a058c087bca6df456cb728514eafe778ea384369a622b3604c8b5256b67237d AS terminal
+
+FROM eclipse-temurin:21-jre-jammy
+LABEL org.opencontainers.image.title="Portfolio progression demo: film-query" \
+      org.opencontainers.image.description="Browser-hosted learning-era JDBC progression demo" \
+      org.opencontainers.image.source="https://github.com/braidenm/portfolio-demo-lab"
+RUN groupadd --gid 10001 demo \
+    && useradd --uid 10001 --gid 10001 --no-create-home --home-dir /nonexistent --shell /usr/sbin/nologin demo \
+    && mkdir -p /app/lib \
+    && chown -R 10001:10001 /app
+COPY --from=terminal /usr/bin/ttyd /usr/local/bin/ttyd
+COPY --from=terminal /usr/bin/tini /usr/local/bin/tini
+COPY --from=build /workspace/target/FilmQuery-0.0.1-SNAPSHOT.jar /app/demo.jar
+COPY --from=build /dependencies/ /app/lib/
+COPY adapters/film-query/entrypoint.sh /app/entrypoint.sh
+RUN chmod 0555 /app/entrypoint.sh
+USER 10001:10001
+WORKDIR /app
+ENV HOME=/tmp \
+    FILM_DB_URL="jdbc:mysql://film-query-db:3306/sdvid?useSSL=false&allowPublicKeyRetrieval=true" \
+    FILM_DB_USER="film_demo"
+EXPOSE 7681
+HEALTHCHECK --interval=15s --timeout=3s --retries=4 CMD ["bash", "-c", ": >/dev/tcp/127.0.0.1/7681"]
+ENTRYPOINT ["/usr/local/bin/tini", "--", "/app/entrypoint.sh"]

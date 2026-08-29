@@ -1,0 +1,117 @@
+name: Build progression demos
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - run: node scripts/verify-catalog.mjs
+
+  images:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: make-change
+            dockerfile: images/Dockerfile.cli
+            build_args: |
+              APP_ID=make-change
+              SOURCE_DIR=upstream/make-change
+              MAIN_CLASS=com.skilldistillery.makechange.MakeChangeApp
+          - id: jets
+            dockerfile: images/Dockerfile.cli
+            build_args: |
+              APP_ID=jets
+              SOURCE_DIR=upstream/jets
+              MAIN_CLASS=com.skilldistillery.jets.JestApplication
+          - id: blackjack
+            dockerfile: images/Dockerfile.cli
+            build_args: |
+              APP_ID=blackjack
+              SOURCE_DIR=upstream/blackjack
+              MAIN_CLASS=com.skilldistillery.cards.blackjack.BlackjackApp
+          - id: film-query
+            dockerfile: images/Dockerfile.film-query
+            build_args: ""
+          - id: workout-crud
+            dockerfile: images/Dockerfile.workout-crud
+            build_args: ""
+          - id: volunteer-up
+            dockerfile: images/Dockerfile.volunteer-up
+            build_args: ""
+          - id: film-query-db
+            dockerfile: images/Dockerfile.film-db
+            build_args: ""
+          - id: workout-crud-db
+            dockerfile: images/Dockerfile.workout-db
+            build_args: ""
+          - id: volunteer-up-db
+            dockerfile: images/Dockerfile.volunteer-db
+            build_args: ""
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+      - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+      - if: github.event_name != 'pull_request'
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build image
+        env:
+          APP_ID: ${{ matrix.id }}
+          BUILD_ARGS: ${{ matrix.build_args }}
+          DOCKERFILE: ${{ matrix.dockerfile }}
+          IMAGE: ghcr.io/${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          while IFS= read -r build_arg; do
+            if [[ -n "$build_arg" ]]; then args+=(--build-arg "$build_arg"); fi
+          done <<< "$BUILD_ARGS"
+          docker buildx build --load --file "$DOCKERFILE" "${args[@]}" --tag "$IMAGE:$APP_ID-$SOURCE_SHA" .
+          if [[ "$GITHUB_EVENT_NAME" != pull_request ]]; then docker push "$IMAGE:$APP_ID-$SOURCE_SHA"; fi
+
+  dispatch:
+    if: github.event_name == 'push'
+    needs: [catalog, images]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request homelab deployment
+        env:
+          INFRA_REPO_TOKEN: ${{ secrets.INFRA_REPO_TOKEN }}
+          SOURCE_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$INFRA_REPO_TOKEN" ]]; then
+            echo "INFRA_REPO_TOKEN is not configured; images are published but deployment was not requested."
+            exit 0
+          fi
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer $INFRA_REPO_TOKEN" \
+            --header "Accept: application/vnd.github+json" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository_owner }}/home-lab-infrastructure/dispatches" \
+            --data "{\"event_type\":\"portfolio_demos_updated\",\"client_payload\":{\"source_sha\":\"$SOURCE_SHA\",\"image\":\"ghcr.io/${{ github.repository }}\"}}"

@@ -1,0 +1,21 @@
+[submodule "upstream/blackjack"]
+	path = upstream/blackjack
+	url = https://github.com/braidenm/BlackjackProject.git
+[submodule "upstream/jets"]
+	path = upstream/jets
+	url = https://github.com/braidenm/JetsProject.git
+[submodule "upstream/make-change"]
+	path = upstream/make-change
+	url = https://github.com/braidenm/MakeChangeProject.git
+[submodule "upstream/film-query"]
+	path = upstream/film-query
+	url = https://github.com/braidenm/FilmQueryProject.git
+[submodule "upstream/workout-crud"]
+	path = upstream/workout-crud
+	url = https://github.com/braidenm/JPACRUDProject.git
+[submodule "upstream/volunteer-up"]
+	path = upstream/volunteer-up
+	url = https://github.com/braidenm/MidTerm-FullStack.git
+[submodule "upstream/mvc-film"]
+	path = upstream/mvc-film
+	url = https://github.com/braidenm/MVCFilmSite.git

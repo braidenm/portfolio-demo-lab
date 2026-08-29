@@ -1,0 +1,32 @@
+# syntax=docker/dockerfile:1.7
+
+FROM eclipse-temurin:8-jdk-jammy AS build
+COPY upstream/volunteer-up /workspace
+WORKDIR /workspace/MVCItMakesAVillage
+RUN sed -i 's/\r$//' gradlew ../JPAItMakesAVillage/gradlew \
+    && chmod +x gradlew ../JPAItMakesAVillage/gradlew \
+    && ./gradlew --no-daemon clean bootWar \
+    && find /workspace/MVCItMakesAVillage -name '*.war' -type f -exec cp '{}' /app.war \;
+
+FROM eclipse-temurin:8-jre-jammy
+LABEL org.opencontainers.image.title="Portfolio progression demo: volunteer-up" \
+      org.opencontainers.image.description="Isolated compatibility image for a learning-era collaborative Spring/JSP application" \
+      org.opencontainers.image.source="https://github.com/braidenm/portfolio-demo-lab"
+RUN groupadd --gid 10001 demo \
+    && useradd --uid 10001 --gid 10001 --no-create-home --home-dir /nonexistent --shell /usr/sbin/nologin demo \
+    && mkdir -p /app \
+    && chown 10001:10001 /app
+COPY --from=build /app.war /app/app.war
+COPY adapters/legacy-web/entrypoint.sh /app/entrypoint.sh
+RUN chmod 0555 /app/entrypoint.sh
+USER 10001:10001
+WORKDIR /app
+ENV HOME=/tmp \
+    SPRING_DATASOURCE_URL="jdbc:mysql://volunteer-db:3306/villagedb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
+    SPRING_DATASOURCE_USERNAME="panda1" \
+    LOGGING_LEVEL_ROOT="WARN" \
+    LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB="WARN" \
+    LOGGING_LEVEL_ORG_HIBERNATE_SQL="WARN" \
+    SPRING_JPA_SHOW_SQL="false"
+EXPOSE 8080
+ENTRYPOINT ["/app/entrypoint.sh"]

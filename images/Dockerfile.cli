@@ -1,0 +1,39 @@
+# syntax=docker/dockerfile:1.7
+
+ARG SOURCE_DIR
+ARG MAIN_CLASS
+
+FROM eclipse-temurin:21-jdk-jammy AS build
+ARG APP_ID
+ARG SOURCE_DIR
+ARG MAIN_CLASS
+COPY ${SOURCE_DIR}/src /src
+RUN mkdir -p /classes \
+    && if [ "${APP_ID}" = "jets" ]; then \
+         mv /src/com/skilldistillery/jets/jet.java /src/com/skilldistillery/jets/Jet.java; \
+         rm -rf /src/com/skilldistillery/test; \
+       fi \
+    && find /src -name '*.java' -print0 | xargs -0 javac --release 8 -encoding UTF-8 -d /classes \
+    && jar --create --file /demo.jar --main-class "${MAIN_CLASS}" -C /classes .
+
+FROM tsl0922/ttyd:1.7.7@sha256:9a058c087bca6df456cb728514eafe778ea384369a622b3604c8b5256b67237d AS terminal
+
+FROM eclipse-temurin:21-jre-jammy
+ARG APP_ID
+LABEL org.opencontainers.image.title="Portfolio progression demo: ${APP_ID}" \
+      org.opencontainers.image.description="Browser-hosted learning-era Java CLI progression demo" \
+      org.opencontainers.image.source="https://github.com/braidenm/portfolio-demo-lab"
+RUN groupadd --gid 10001 demo \
+    && useradd --uid 10001 --gid 10001 --no-create-home --home-dir /nonexistent --shell /usr/sbin/nologin demo \
+    && mkdir -p /app \
+    && chown 10001:10001 /app
+COPY --from=terminal /usr/bin/ttyd /usr/local/bin/ttyd
+COPY --from=terminal /usr/bin/tini /usr/local/bin/tini
+COPY --from=build /demo.jar /app/demo.jar
+USER 10001:10001
+WORKDIR /app
+ENV HOME=/tmp
+EXPOSE 7681
+HEALTHCHECK --interval=15s --timeout=3s --retries=4 CMD ["bash", "-c", ": >/dev/tcp/127.0.0.1/7681"]
+ENTRYPOINT ["/usr/local/bin/tini", "--"]
+CMD ["ttyd", "--writable", "--check-origin", "--max-clients", "12", "--ping-interval", "15", "--terminal-type", "xterm-256color", "java", "-XX:MaxRAMPercentage=70", "-jar", "/app/demo.jar"]

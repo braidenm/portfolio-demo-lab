@@ -1,0 +1,40 @@
+# syntax=docker/dockerfile:1.7
+
+FROM eclipse-temurin:8-jdk-jammy AS build
+COPY upstream/workout-crud /workspace
+COPY adapters/workout-crud/DemoPersistence.java /workspace/WorkoutProgram/src/main/java/com/skilldistillery/exercises/data/DemoPersistence.java
+WORKDIR /workspace/BootWorkOutProgram
+RUN sed -i 's/\r$//' gradlew ../WorkoutProgram/gradlew \
+    && find ../WorkoutProgram/src/main/java -name '*DAOImpl.java' -exec sed -i 's/Persistence\.createEntityManagerFactory/DemoPersistence.create/' '{}' + \
+    && grep -R 'DemoPersistence.create("ExercisesDB")' ../WorkoutProgram/src/main/java/com/skilldistillery/exercises/data \
+    && ! grep 'Persistence.createEntityManagerFactory' ../WorkoutProgram/src/main/java/com/skilldistillery/exercises/data/*DAOImpl.java \
+    && chmod +x gradlew ../WorkoutProgram/gradlew \
+    && ./gradlew --no-daemon clean bootWar \
+    && find /workspace/BootWorkOutProgram -name '*.war' -type f -exec cp '{}' /app.war \; \
+    && mkdir /exploded \
+    && cd /exploded \
+    && jar -xf /app.war
+
+FROM eclipse-temurin:8-jre-jammy
+LABEL org.opencontainers.image.title="Portfolio progression demo: workout-crud" \
+      org.opencontainers.image.description="Isolated compatibility image for a learning-era Spring/JSP CRUD application" \
+      org.opencontainers.image.source="https://github.com/braidenm/portfolio-demo-lab"
+RUN groupadd --gid 10001 demo \
+    && useradd --uid 10001 --gid 10001 --no-create-home --home-dir /nonexistent --shell /usr/sbin/nologin demo \
+    && mkdir -p /app \
+    && chown 10001:10001 /app
+COPY --from=build /exploded/ /app/
+COPY adapters/legacy-web/entrypoint.sh /app/entrypoint.sh
+RUN chmod 0555 /app/entrypoint.sh
+USER 10001:10001
+WORKDIR /app
+ENV HOME=/tmp \
+    APP_MAIN_CLASS="com.skilldistillery.exercises.BootWorkOutProgramApplication" \
+    SPRING_DATASOURCE_URL="jdbc:mysql://workout-db:3306/exercisesdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
+    SPRING_DATASOURCE_USERNAME="exerciseuser" \
+    LOGGING_LEVEL_ROOT="WARN" \
+    LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB="WARN" \
+    LOGGING_LEVEL_ORG_HIBERNATE_SQL="WARN" \
+    SPRING_JPA_SHOW_SQL="false"
+EXPOSE 8080
+ENTRYPOINT ["/app/entrypoint.sh"]
