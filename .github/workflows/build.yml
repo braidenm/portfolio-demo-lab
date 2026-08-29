@@ -90,7 +90,14 @@ jobs:
             if [[ -n "$build_arg" ]]; then args+=(--build-arg "$build_arg"); fi
           done <<< "$BUILD_ARGS"
           docker buildx build --load --file "$DOCKERFILE" "${args[@]}" --tag "$IMAGE:$APP_ID-$SOURCE_SHA" .
-          if [[ "$GITHUB_EVENT_NAME" != pull_request ]]; then docker push "$IMAGE:$APP_ID-$SOURCE_SHA"; fi
+          if [[ "$GITHUB_EVENT_NAME" != pull_request ]]; then
+            for attempt in 1 2 3; do
+              if docker push "$IMAGE:$APP_ID-$SOURCE_SHA"; then break; fi
+              if [[ "$attempt" == 3 ]]; then exit 1; fi
+              echo "Registry push failed; retrying in $((attempt * 10)) seconds..."
+              sleep $((attempt * 10))
+            done
+          fi
 
   dispatch:
     if: github.event_name == 'push'
